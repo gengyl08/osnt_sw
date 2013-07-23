@@ -42,6 +42,17 @@ class Port_Arbiter:
         pcap_list = [None]*len(engine_list);
         for i in range(len(engine_list)):
             pcap_list[i] = rdpcap(engine_list[i] + '.cap')
+        queues_num = range(len(engine_list))
+        pkts_num = sum(len(pkts) for pkts in pcap_list)
+        pkts = [None]*pkts_num
+        while(sum(pos)<pkts_num):
+            queue_id = 0
+            for i in range(queues_num):
+                if(pos[i] < len(pcap_list[i]) and pcap_list[i][pos[i]].time < pcap_list[queue_id][pos[queue_id]]):
+                    queue_id = i
+            pkts[sum(pos)] = pcap_list[queue_id][pos[queue_id]]
+            pos[queue_id] = pos[queue_id] + 1
+        wrpcap(iface + '.cap', pkts)
 
 
 if __name__=="__main__":
@@ -51,3 +62,6 @@ if __name__=="__main__":
 
     poisson = Poisson_Engine('poisson', 100, 20)
     poisson.generate(10)
+
+    arbiter = Port_Arbiter('eth1', ['cbr', 'poisson'])
+    arbiter.merge_queues()
