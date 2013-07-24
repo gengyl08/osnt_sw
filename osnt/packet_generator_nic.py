@@ -1,6 +1,7 @@
 import os
 from scapy import *
 from scapy.all import *
+from subprocess import Popen, PIPE
 
 class CBR_Engine:
     # pkt_rate in pkts/second, pkt_length in bytes
@@ -72,6 +73,14 @@ class Rate_Limiter:
             pkt.time = max(pkt.time, last_pkt_end_time)
             last_pkt_end_time = pkt.time + len(pkt)*8/self.rate
         wrpcap(self.iface + '.cap', pkts)
+
+class Pcap_Replay:
+    def __init__(self, iface):
+        self.iface = iface
+
+    def replay(self):
+        
+            
 
 if __name__=="__main__":
 
